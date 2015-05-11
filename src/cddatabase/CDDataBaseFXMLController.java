@@ -24,8 +24,6 @@ import java.util.logging.Logger;
 public class CDDataBaseFXMLController implements Initializable {
     
     @FXML
-    private TextArea txtConsole;
-    @FXML
     private Button btnArtist;
     @FXML
     private Button btnAlbum;
@@ -47,6 +45,14 @@ public class CDDataBaseFXMLController implements Initializable {
     private String password;
     
     private static Connection connection;  
+    @FXML
+    private TextArea txtArtistConsole;
+    @FXML
+    private TextArea txtAlbumConsole;
+    @FXML
+    private TextArea txtBorrowerConsole;
+    @FXML
+    private TextArea txtBorrowListConsole;
     
     
     @Override
@@ -58,7 +64,7 @@ public class CDDataBaseFXMLController implements Initializable {
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(CDDataBaseFXMLController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        txtConsole.setText("Driver Loaded\n");
+        //txtArtistConsole.setText("Driver Loaded\n");
     }    
 
     @FXML
@@ -73,7 +79,7 @@ public class CDDataBaseFXMLController implements Initializable {
                 // Connect to a database
             try{
             connection = DriverManager.getConnection(connectionString , username, password);
-            txtConsole.appendText("Database Connected\n");
+            //txtConsole.appendText("Database Connected\n");
             btnConnect.setText("Disconnect");
 
             } 
@@ -102,9 +108,9 @@ public class CDDataBaseFXMLController implements Initializable {
         ResultSet resultSet = statement.executeQuery
           ("select * from Artist");
 
-        // Iterate through the result and print the student names
+        // Iterate through the result and print the artists
         while (resultSet.next())
-          txtConsole.appendText(resultSet.getString(1) + "\t" +
+          txtArtistConsole.appendText(resultSet.getString(1) + "\t" +
             resultSet.getString(2) + "\t" + resultSet.getString(3) + "\n");
 
 
@@ -120,9 +126,9 @@ public class CDDataBaseFXMLController implements Initializable {
         ResultSet resultSet = statement.executeQuery
           ("select * from Album");
 
-        // Iterate through the result and print the student names
+        // Iterate through the result and print the albums
         while (resultSet.next())
-          txtConsole.appendText(resultSet.getString(1) + "\t" +
+          txtAlbumConsole.appendText(resultSet.getString(1) + "\t" +
                                 resultSet.getString(2) + "\t" + 
                                 resultSet.getString(3) + "\t" +
                                 resultSet.getString(4) + "\t" +
@@ -132,7 +138,21 @@ public class CDDataBaseFXMLController implements Initializable {
     }
 
     @FXML
-    private void btnBorrower_Click(ActionEvent event) {
+    private void btnBorrower_Click(ActionEvent event) throws SQLException {
+        
+        // Create a statement
+        Statement statement = connection.createStatement();
+
+        // Execute a statement
+        ResultSet resultSet = statement.executeQuery
+          ("select * from Borrower");
+
+        // Iterate through the result and print the borrowers
+        while (resultSet.next())
+          txtBorrowerConsole.appendText(resultSet.getString(1) + "\t" +
+                                resultSet.getString(2) + "\t" + 
+                                resultSet.getString(3) + "\t" +
+                                resultSet.getString(4) + "\n");
     }
 
     @FXML
