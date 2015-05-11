@@ -23,6 +23,11 @@
                      <children>
                         <Button fx:id="btnArtist" layoutX="10.0" layoutY="43.0" mnemonicParsing="false" onAction="#btnArtist_Click" text="Select All" />
                         <TextArea fx:id="txtArtistConsole" layoutY="113.0" prefHeight="357.0" prefWidth="608.0" />
+                        <TextField fx:id="txtArtistName" layoutX="431.0" layoutY="14.0" />
+                        <TextField fx:id="txtArtistGenre" layoutX="431.0" layoutY="50.0" />
+                        <Button fx:id="btnAddNewArtist" layoutX="484.0" layoutY="87.0" mnemonicParsing="false" onAction="#btnAddNewArtist_Click" text="Add New Artist" />
+                        <Label layoutX="396.0" layoutY="19.0" text="Artist:" />
+                        <Label layoutX="391.0" layoutY="55.0" text="Genre:" />
                      </children>
                   </AnchorPane>
             </content>
@@ -33,6 +38,13 @@
                      <children>
                         <Button fx:id="btnAlbum" layoutX="1.0" layoutY="33.0" mnemonicParsing="false" onAction="#btnAlbum_Click" text="Select All" />
                         <TextArea fx:id="txtAlbumConsole" layoutX="-1.0" layoutY="91.0" prefHeight="383.0" prefWidth="611.0" />
+                        <TextField fx:id="txtAlbum" layoutX="232.0" layoutY="14.0" />
+                        <TextField fx:id="txtAlbumConsoleArtist" layoutX="443.0" layoutY="14.0" />
+                        <TextField fx:id="txtReleaseDate" layoutX="233.0" layoutY="59.0" />
+                        <Button fx:id="btnAddNewAlbum" layoutX="444.0" layoutY="59.0" mnemonicParsing="false" onAction="#btnAddNewAlbum_Click" text="Add New Album" />
+                        <Label layoutX="189.0" layoutY="19.0" text="Album:" />
+                        <Label layoutX="149.0" layoutY="64.0" text="Release Date:" />
+                        <Label layoutX="408.0" layoutY="19.0" text="Artist:" />
                      </children>
                   </AnchorPane>
             </content>

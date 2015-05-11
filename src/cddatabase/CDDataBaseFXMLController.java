@@ -53,6 +53,20 @@ public class CDDataBaseFXMLController implements Initializable {
     private TextArea txtBorrowerConsole;
     @FXML
     private TextArea txtBorrowListConsole;
+    @FXML
+    private TextField txtArtistName;
+    @FXML
+    private TextField txtArtistGenre;
+    @FXML
+    private Button btnAddNewArtist;
+    @FXML
+    private TextField txtAlbum;
+    @FXML
+    private TextField txtAlbumConsoleArtist;
+    @FXML
+    private TextField txtReleaseDate;
+    @FXML
+    private Button btnAddNewAlbum;
     
     
     @Override
@@ -108,6 +122,8 @@ public class CDDataBaseFXMLController implements Initializable {
         ResultSet resultSet = statement.executeQuery
           ("select * from Artist");
 
+        txtArtistConsole.clear();
+        
         // Iterate through the result and print the artists
         while (resultSet.next())
           txtArtistConsole.appendText(resultSet.getString(1) + "\t" +
@@ -126,6 +142,8 @@ public class CDDataBaseFXMLController implements Initializable {
         ResultSet resultSet = statement.executeQuery
           ("select * from Album");
 
+        txtAlbumConsole.clear();
+        
         // Iterate through the result and print the albums
         while (resultSet.next())
           txtAlbumConsole.appendText(resultSet.getString(1) + "\t" +
@@ -146,6 +164,8 @@ public class CDDataBaseFXMLController implements Initializable {
         // Execute a statement
         ResultSet resultSet = statement.executeQuery
           ("select * from Borrower");
+        
+        txtBorrowerConsole.clear();
 
         // Iterate through the result and print the borrowers
         while (resultSet.next())
@@ -157,6 +177,28 @@ public class CDDataBaseFXMLController implements Initializable {
 
     @FXML
     private void btnBorrowList_Click(ActionEvent event) {
+    }
+
+    @FXML
+    private void btnAddNewArtist_Click(ActionEvent event) throws SQLException {
+        
+        // Create a statement
+        Statement statement = connection.createStatement();
+
+        // Execute an insert statement
+        statement.execute("INSERT INTO Artist(id, Name, Genre) VALUES (NULL, '" + txtArtistName.getText() 
+            + "', '" + txtArtistGenre.getText() + "');");
+    }
+
+    @FXML
+    private void btnAddNewAlbum_Click(ActionEvent event) throws SQLException {
+        
+        // Create a statement
+        Statement statement = connection.createStatement();
+        
+        //Execute an insert statement
+        statement.execute(username)
+        
     }
     
 }
