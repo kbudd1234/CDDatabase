@@ -12,10 +12,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -27,7 +27,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
-
+import java.util.Date;
 /**
  *
  * @author kevinbudd
@@ -118,9 +118,20 @@ public class CDDataBaseFXMLController implements Initializable {
     @FXML
     private TableView<String> tableviewBorrowerHistory;
     
+    private Date date;
+    private Date dueDate;
+    private SimpleDateFormat sdf;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        
+        date = new Date();
+        String DATE_FORMAT = "yyyy-MM-dd";
+        sdf = new SimpleDateFormat(DATE_FORMAT);
+        System.out.println(sdf.format(date));
+        long DAY_IN_MS = 1000 * 60 * 60 * 24;
+        dueDate = new Date(System.currentTimeMillis() + (14 * DAY_IN_MS));
+        System.out.println(sdf.format(dueDate));
         
         try {
             // Load the JDBC driver
@@ -408,7 +419,8 @@ public class CDDataBaseFXMLController implements Initializable {
 
         // Execute an insert statement
         statement.execute("INSERT INTO BorrowList(id, AlbumName, BorrowerName, BorrowDate, DueDate) VALUES" +
-                "(NULL, '" + selectedAlbum  + "', '" + selectedBorrower + "', '2015-05-12', '2015-05-26');");
+                "(NULL, '" + selectedAlbum  + "', '" + selectedBorrower + "', '" + sdf.format(date) +
+                "', '" + sdf.format(dueDate) + "');");
         
         // Refresh tableview with new data
         String SQL = "select * from BorrowList";
