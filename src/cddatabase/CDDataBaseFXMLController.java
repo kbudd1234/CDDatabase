@@ -32,14 +32,6 @@ import javafx.util.Callback;
 public class CDDataBaseFXMLController implements Initializable {
     
     @FXML
-    private Button btnArtist;
-    @FXML
-    private Button btnAlbum;
-    @FXML
-    private Button btnBorrower;
-    @FXML
-    private Button btnBorrowList;
-    @FXML
     private Button btnConnect;
     @FXML
     private TextField txtConnection;
@@ -47,22 +39,10 @@ public class CDDataBaseFXMLController implements Initializable {
     private TextField txtUserName;
     @FXML
     private TextField txtPassword;
-    
-    private String connectionString;
-    private String username;
-    private String password;
-    
-    private static Connection connection;  
-    @FXML
-    private TextArea txtBorrowerConsole;
-    @FXML
-    private TextArea txtBorrowListConsole;
     @FXML
     private TextField txtArtistName;
     @FXML
     private TextField txtArtistGenre;
-    @FXML
-    private Button btnAddNewArtist;
     @FXML
     private TextField txtAlbum;
     @FXML
@@ -70,16 +50,28 @@ public class CDDataBaseFXMLController implements Initializable {
     @FXML
     private TextField txtReleaseDate;
     @FXML
-    private Button btnAddNewAlbum;
-   
-    @FXML
     private TableView<String> tableviewArtist;
     @FXML
     private TableView<String> tableviewAlbum;
-    
+    @FXML
+    private TableView<String> tableviewBorrower;
+    @FXML
+    private TextField txtName;
+    @FXML
+    private TextField txtAddress;
+    @FXML
+    private TextField txtPhone;
     
     private ObservableList artistData;
     private ObservableList albumData;
+    private ObservableList borrowerData;
+    
+    private static Connection connection;
+    private String connectionString;
+    private String username;
+    private String password;
+    
+    
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -90,7 +82,6 @@ public class CDDataBaseFXMLController implements Initializable {
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(CDDataBaseFXMLController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
         
     }
     
@@ -197,21 +188,13 @@ public class CDDataBaseFXMLController implements Initializable {
     @FXML
     private void btnBorrower_Click(ActionEvent event) throws SQLException {
         
-        // Create a statement
+        borrowerData = FXCollections.observableArrayList();
+       
         Statement statement = connection.createStatement();
-
-        // Execute a statement
-        ResultSet resultSet = statement.executeQuery
-          ("select * from Borrower");
         
-        txtBorrowerConsole.clear();
+        String SQL = "select * from Borrower";
 
-        // Iterate through the result and print the borrowers
-        while (resultSet.next())
-          txtBorrowerConsole.appendText(resultSet.getString(1) + "\t" +
-                                resultSet.getString(2) + "\t" + 
-                                resultSet.getString(3) + "\t" +
-                                resultSet.getString(4) + "\n");
+        buildData(SQL, borrowerData, tableviewBorrower);
     }
 
     @FXML
@@ -228,7 +211,6 @@ public class CDDataBaseFXMLController implements Initializable {
         statement.execute("INSERT INTO Artist(id, Name, Genre) VALUES (NULL, '" + txtArtistName.getText() 
             + "', '" + txtArtistGenre.getText() + "');");
         
-        
         // Refresh tableview with new data
         artistData.removeAll(artistData);
         String SQL = "select * from Artist";
@@ -242,10 +224,31 @@ public class CDDataBaseFXMLController implements Initializable {
         // Create a statement
         Statement statement = connection.createStatement();
         
-        //Execute an insert statement
+        // Execute an insert statement
         statement.execute("INSERT INTO Album(id, AlbumName, Artist, ReleaseDate, Status) VALUES (NULL, '" +
                 txtAlbum.getText() + "', '" + txtAlbumConsoleArtist.getText() + "', '" + txtReleaseDate.getText() + "', DEFAULT);");
         
+        // Refresh tableview
+        albumData.removeAll(albumData);
+        String SQL = "select * from Album";
+        buildData(SQL, albumData, tableviewAlbum);
+        
+    }
+
+    @FXML
+    private void btnAddNewBorrower_Click(ActionEvent event) throws SQLException {
+        
+        // Create a statement
+        Statement statement = connection.createStatement();
+        
+        // Execute an insert statement
+        statement.execute("INSERT INTO Borrower(id, Name, Address, Phone) VALUES (NULL, '" +
+                txtName.getText() + "', '" + txtAddress.getText() + "', '" + txtPhone.getText() + "');");
+        
+        // Refresh tableview
+        borrowerData.removeAll(borrowerData);
+        String SQL = "select * from Borrower";
+        buildData(SQL, borrowerData, tableviewBorrower);
     }
     
 }
