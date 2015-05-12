@@ -227,6 +227,13 @@ public class CDDataBaseFXMLController implements Initializable {
         // Execute an insert statement
         statement.execute("INSERT INTO Artist(id, Name, Genre) VALUES (NULL, '" + txtArtistName.getText() 
             + "', '" + txtArtistGenre.getText() + "');");
+        
+        
+        // Refresh tableview with new data
+        artistData.removeAll(artistData);
+        String SQL = "select * from Artist";
+        buildData(SQL, artistData, tableviewArtist);
+        
     }
 
     @FXML

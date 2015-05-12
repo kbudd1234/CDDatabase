@@ -17,6 +17,12 @@ public class Artist {
     private final StringProperty id = new SimpleStringProperty(this, "id", "0");
     private final StringProperty artist = new SimpleStringProperty(this, "artist", "name");
     private final StringProperty genre = new SimpleStringProperty(this, "genre", "genre");
+    
+    public Artist() {
+        
+    }
+    
+    
 
     public String getId() {
         return id.get();
