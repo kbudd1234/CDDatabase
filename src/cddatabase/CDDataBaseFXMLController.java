@@ -10,13 +10,11 @@ import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -108,6 +106,8 @@ public class CDDataBaseFXMLController implements Initializable {
     private TableView<String> tableviewBorrowList;
     @FXML
     private ListView<String> lstBorrowerName;
+    @FXML
+    private Button btnReturn;
     
     
     
@@ -386,6 +386,13 @@ public class CDDataBaseFXMLController implements Initializable {
         borrowListData.removeAll(borrowListData);
         String SQL = "select * from BorrowList";
         buildData(SQL, borrowListData, tableviewBorrowList);
+        
+        // Update Album table 
+        Statement state = connection.createStatement();
+        
+        // Execute an update Statement
+        statement.execute("update Album set Status = 'Borrowed' where AlbumName = '" + selectedAlbum + "';");
+        
         
     }
     
