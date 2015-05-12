@@ -197,7 +197,8 @@ public class CDDataBaseFXMLController implements Initializable {
         Statement statement = connection.createStatement();
         
         //Execute an insert statement
-        statement.execute(username)
+        statement.execute("INSERT INTO Album(id, AlbumName, Artist, ReleaseDate, Status) VALUES (NULL, '" +
+                txtAlbum.getText() + "', '" + txtAlbumConsoleArtist.getText() + "', '" + txtReleaseDate.getText() + "', DEFAULT);");
         
     }
     
