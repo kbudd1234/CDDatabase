@@ -7,7 +7,6 @@ package cddatabase;
 
 import java.net.URL;
 import java.util.ResourceBundle;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -16,6 +15,15 @@ import javafx.scene.control.TextField;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.control.TableView;
+import javafx.util.Callback;
 
 /**
  *
@@ -46,10 +54,6 @@ public class CDDataBaseFXMLController implements Initializable {
     
     private static Connection connection;  
     @FXML
-    private TextArea txtArtistConsole;
-    @FXML
-    private TextArea txtAlbumConsole;
-    @FXML
     private TextArea txtBorrowerConsole;
     @FXML
     private TextArea txtBorrowListConsole;
@@ -67,7 +71,15 @@ public class CDDataBaseFXMLController implements Initializable {
     private TextField txtReleaseDate;
     @FXML
     private Button btnAddNewAlbum;
+   
+    @FXML
+    private TableView<String> tableviewArtist;
+    @FXML
+    private TableView<String> tableviewAlbum;
     
+    
+    private ObservableList artistData;
+    private ObservableList albumData;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -78,8 +90,54 @@ public class CDDataBaseFXMLController implements Initializable {
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(CDDataBaseFXMLController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        //txtArtistConsole.setText("Driver Loaded\n");
-    }    
+        
+        
+    }
+    
+    public void buildData(String sql, ObservableList data, TableView<String> tableview) {
+          
+        try{
+            
+            ResultSet rs = connection.createStatement().executeQuery(sql);
+
+            /**********************************
+             * TABLE COLUMN ADDED DYNAMICALLY *
+             **********************************/
+            for(int i=0 ; i<rs.getMetaData().getColumnCount(); i++){
+                //We are using non property style for making dynamic table
+                final int j = i;                
+                TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i+1));
+                col.setCellValueFactory(new Callback<CellDataFeatures<ObservableList,String>,ObservableValue<String>>(){                    
+                    public ObservableValue<String> call(CellDataFeatures<ObservableList, String> param) {                                                                                              
+                        return new SimpleStringProperty(param.getValue().get(j).toString());                        
+                    }                    
+                });
+                tableview.getColumns().addAll(col); 
+                
+            }
+
+            /********************************
+             * Data added to ObservableList *
+             ********************************/
+            while(rs.next()){
+                //Iterate Row
+                ObservableList<String> row = FXCollections.observableArrayList();
+                for(int i=1 ; i<=rs.getMetaData().getColumnCount(); i++){
+                    //Iterate Column
+                    row.add(rs.getString(i));
+                }
+                
+                data.add(row);
+
+            }
+
+            //FINALLY ADDED TO TableView
+            tableview.setItems(data);
+            
+          }catch(Exception e){
+              System.out.println("Error on Building Data");             
+          }
+      }
 
     @FXML
     private void btnConnect_Click(ActionEvent event) throws SQLException {
@@ -90,12 +148,10 @@ public class CDDataBaseFXMLController implements Initializable {
             username = txtUserName.getText();
             password = txtPassword.getText();
 
-                // Connect to a database
             try{
             connection = DriverManager.getConnection(connectionString , username, password);
-            //txtConsole.appendText("Database Connected\n");
+            
             btnConnect.setText("Disconnect");
-
             } 
             catch (Exception ex) {
                 System.out.println(ex);
@@ -115,44 +171,27 @@ public class CDDataBaseFXMLController implements Initializable {
     @FXML
     private void btnArtist_Click(ActionEvent event) throws SQLException {
         
-        // Create a statement
+        artistData = FXCollections.observableArrayList();
+       
         Statement statement = connection.createStatement();
-
-        // Execute a statement
-        ResultSet resultSet = statement.executeQuery
-          ("select * from Artist");
-
-        txtArtistConsole.clear();
         
-        // Iterate through the result and print the artists
-        while (resultSet.next())
-          txtArtistConsole.appendText(resultSet.getString(1) + "\t" +
-            resultSet.getString(2) + "\t" + resultSet.getString(3) + "\n");
+        String SQL = "select * from Artist";
 
+        buildData(SQL, artistData, tableviewArtist);
 
         }
 
     @FXML
     private void btnAlbum_Click(ActionEvent event) throws SQLException {
         
-        // Create a statement
+        albumData = FXCollections.observableArrayList();
+       
         Statement statement = connection.createStatement();
-
-        // Execute a statement
-        ResultSet resultSet = statement.executeQuery
-          ("select * from Album");
-
-        txtAlbumConsole.clear();
         
-        // Iterate through the result and print the albums
-        while (resultSet.next())
-          txtAlbumConsole.appendText(resultSet.getString(1) + "\t" +
-                                resultSet.getString(2) + "\t" + 
-                                resultSet.getString(3) + "\t" +
-                                resultSet.getString(4) + "\t" +
-                                resultSet.getString(5) + "\n");
-                  
-                  
+        String SQL = "select * from Album";
+
+        buildData(SQL, albumData, tableviewAlbum);
+
     }
 
     @FXML
