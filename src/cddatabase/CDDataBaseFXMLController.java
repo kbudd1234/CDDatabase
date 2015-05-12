@@ -15,6 +15,7 @@ import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -64,14 +65,17 @@ public class CDDataBaseFXMLController implements Initializable {
     @FXML
     private TextField txtPhone;
     
-    private ObservableList artistData;
-    private ObservableList albumData;
-    private ObservableList borrowerData;
-    private ObservableList borrowListData;
+    private ObservableList artistData = FXCollections.observableArrayList();
+    private ObservableList albumData = FXCollections.observableArrayList();
+    private ObservableList borrowerData = FXCollections.observableArrayList();
+    private ObservableList borrowListData = FXCollections.observableArrayList();
     
-    private ObservableList artistNamesData;
-    private ObservableList albumNamesData;
-    private ObservableList borrowerNameData;
+    private ObservableList artistNamesData = FXCollections.observableArrayList();
+    private ObservableList albumNamesData = FXCollections.observableArrayList();
+    private ObservableList borrowerNameData = FXCollections.observableArrayList();
+    
+    private ObservableList albumHistoryData = FXCollections.observableArrayList();
+    private ObservableList borrowerHistoryData = FXCollections.observableArrayList();
     
     private static Connection connection;
     private String connectionString;
@@ -97,6 +101,7 @@ public class CDDataBaseFXMLController implements Initializable {
     private String selectedArtist;
     private String selectedAlbum;
     private String selectedBorrower;
+    private String selectedBorrowListItem;
     
     @FXML
     private ListView<String> lstAlbums;
@@ -108,7 +113,10 @@ public class CDDataBaseFXMLController implements Initializable {
     private ListView<String> lstBorrowerName;
     @FXML
     private Button btnReturn;
-    
+    @FXML
+    private TableView<String> tableviewAlbumHistory;
+    @FXML
+    private TableView<String> tableviewBorrowerHistory;
     
     
     @Override
@@ -138,27 +146,46 @@ public class CDDataBaseFXMLController implements Initializable {
         lstAlbums.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
             
             selectedAlbum = newValue;
+            
             System.out.println(selectedAlbum);
+            
+            albumHistoryData.removeAll(albumHistoryData);
+            
+            String SQL = "select AlbumName, BorrowerName, BorrowDate, DueDate from BorrowList where AlbumName = '" + selectedAlbum + "';";
+
+            buildData(SQL, albumHistoryData, tableviewAlbumHistory);
+            
+            
             
         });
         
         lstBorrowerName.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
             
             selectedBorrower = newValue;
+            
             System.out.println(selectedBorrower);
+            
+            borrowerHistoryData.removeAll(borrowerHistoryData);
+            
+            String SQL = "select AlbumName, BorrowerName, BorrowDate, DueDate from BorrowList where BorrowerName = '" + selectedBorrower + "';";
+
+            buildData(SQL, borrowerHistoryData, tableviewBorrowerHistory);
             
         });
         
+        
     }
+    
     
     public void populateAlbumListview(String artist) throws SQLException{
         
-        albumNamesData = FXCollections.observableArrayList();
+        albumNamesData.removeAll(albumNamesData);
         
         Statement statement;
 
         statement = connection.createStatement();
 
+        //ResultSet rs = statement.executeQuery("select AlbumName from Album where Artist = '" + artist + "' and Status = 'In Hand';");
         ResultSet rs = statement.executeQuery("select AlbumName from Album where Artist = '" + artist + "';");
         
         while (rs.next()) {
@@ -174,12 +201,12 @@ public class CDDataBaseFXMLController implements Initializable {
         try{
             
             ResultSet rs = connection.createStatement().executeQuery(sql);
-
-            /**********************************
-             * TABLE COLUMN ADDED DYNAMICALLY *
-             **********************************/
+            
+            tableview.getColumns().clear();
+            
+            // Add Table Columns
             for(int i=0 ; i<rs.getMetaData().getColumnCount(); i++){
-                //We are using non property style for making dynamic table
+                
                 final int j = i;                
                 TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i+1));
                 col.setCellValueFactory(new Callback<CellDataFeatures<ObservableList,String>,ObservableValue<String>>(){                    
@@ -191,14 +218,12 @@ public class CDDataBaseFXMLController implements Initializable {
                 
             }
 
-            /********************************
-             * Data added to ObservableList *
-             ********************************/
+            // Add data to observableList
             while(rs.next()){
-                //Iterate Row
+                
                 ObservableList<String> row = FXCollections.observableArrayList();
                 for(int i=1 ; i<=rs.getMetaData().getColumnCount(); i++){
-                    //Iterate Column
+                    
                     row.add(rs.getString(i));
                 }
                 
@@ -206,7 +231,7 @@ public class CDDataBaseFXMLController implements Initializable {
 
             }
 
-            //FINALLY ADDED TO TableView
+            // add data to the tableview
             tableview.setItems(data);
             
           }catch(Exception e){
@@ -242,43 +267,23 @@ public class CDDataBaseFXMLController implements Initializable {
     
     }
     
-
     @FXML
     private void btnArtist_Click(ActionEvent event) throws SQLException {
         
-        artistData = FXCollections.observableArrayList();
-       
-        Statement statement = connection.createStatement();
-        
-        String SQL = "select * from Artist";
-
-        buildData(SQL, artistData, tableviewArtist);
+        buildData("select * from Artist", artistData, tableviewArtist);
 
         }
 
     @FXML
     private void btnAlbum_Click(ActionEvent event) throws SQLException {
         
-        albumData = FXCollections.observableArrayList();
-       
-        Statement statement = connection.createStatement();
-        
-        String SQL = "select * from Album";
-
-        buildData(SQL, albumData, tableviewAlbum);
-
-    }
+        buildData("select * from Album", albumData, tableviewAlbum);
+}
 
     @FXML
     private void btnBorrower_Click(ActionEvent event) throws SQLException {
         
-        borrowerData = FXCollections.observableArrayList();
-       
-        Statement statement = connection.createStatement();
-        
-        String SQL = "select * from Borrower";
-
-        buildData(SQL, borrowerData, tableviewBorrower);
+        buildData("select * from Borrower", borrowerData, tableviewBorrower);
     }
 
 
@@ -335,15 +340,11 @@ public class CDDataBaseFXMLController implements Initializable {
     @FXML
     private void mnuBorrowList_Clicked(Event event) throws SQLException {
         
-        borrowListData = FXCollections.observableArrayList();
-       
         Statement statement = connection.createStatement();
         
         String SQL = "select * from BorrowList";
 
         buildData(SQL, borrowListData, tableviewBorrowList);
-        
-        artistNamesData = FXCollections.observableArrayList();
         
         Statement st;
 
@@ -356,8 +357,6 @@ public class CDDataBaseFXMLController implements Initializable {
         }
         
         lstArtist.setItems(artistNamesData);
-        
-        borrowerNameData = FXCollections.observableArrayList();
         
         Statement state;
         
@@ -383,7 +382,6 @@ public class CDDataBaseFXMLController implements Initializable {
                 "(NULL, '" + selectedAlbum  + "', '" + selectedBorrower + "', '2015-05-12', '2015-05-26');");
         
         // Refresh tableview with new data
-        borrowListData.removeAll(borrowListData);
         String SQL = "select * from BorrowList";
         buildData(SQL, borrowListData, tableviewBorrowList);
         
@@ -391,9 +389,19 @@ public class CDDataBaseFXMLController implements Initializable {
         Statement state = connection.createStatement();
         
         // Execute an update Statement
+        state.execute("update Album set Status = 'Borrowed' where AlbumName = '" + selectedAlbum + "';");
+        
+        
+    }
+
+    @FXML
+    private void btnReturn_Click(ActionEvent event) throws SQLException {
+        
+        // Update Album table 
+        Statement statement = connection.createStatement();
+        
+        // Execute an update Statement
         statement.execute("update Album set Status = 'Borrowed' where AlbumName = '" + selectedAlbum + "';");
-        
-        
     }
     
 }
