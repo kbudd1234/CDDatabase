@@ -270,6 +270,8 @@ public class CDDataBaseFXMLController implements Initializable {
     @FXML
     private void btnArtist_Click(ActionEvent event) throws SQLException {
         
+        artistData.removeAll(artistData);
+        
         buildData("select * from Artist", artistData, tableviewArtist);
 
         }
@@ -277,11 +279,15 @@ public class CDDataBaseFXMLController implements Initializable {
     @FXML
     private void btnAlbum_Click(ActionEvent event) throws SQLException {
         
+        albumData.removeAll(albumData);
+        
         buildData("select * from Album", albumData, tableviewAlbum);
 }
 
     @FXML
     private void btnBorrower_Click(ActionEvent event) throws SQLException {
+        
+        borrowerData.removeAll(borrowerData);
         
         buildData("select * from Borrower", borrowerData, tableviewBorrower);
     }
@@ -313,6 +319,25 @@ public class CDDataBaseFXMLController implements Initializable {
         // Execute an insert statement
         statement.execute("INSERT INTO Album(id, AlbumName, Artist, ReleaseDate, Status) VALUES (NULL, '" +
                 txtAlbum.getText() + "', '" + txtAlbumConsoleArtist.getText() + "', '" + txtReleaseDate.getText() + "', DEFAULT);");
+        
+        artistNamesData.removeAll(artistNamesData);
+        
+        Statement st;
+
+        st = connection.createStatement();
+
+        ResultSet rs = st.executeQuery("select Name from Artist");
+        
+        while (rs.next()) {
+            artistNamesData.add(rs.getString("Name"));
+        }
+        
+        if (!artistNamesData.contains(txtAlbumConsoleArtist.getText()))
+        {
+            Statement state = connection.createStatement();
+            state.execute("INSERT INTO Artist(id, Name, Genre) VALUES (NULL, '" + txtAlbumConsoleArtist.getText() 
+            + "', DEFAULT);");
+        }
         
         // Refresh tableview
         albumData.removeAll(albumData);
@@ -346,6 +371,8 @@ public class CDDataBaseFXMLController implements Initializable {
 
         buildData(SQL, borrowListData, tableviewBorrowList);
         
+        artistNamesData.removeAll(artistNamesData);
+        
         Statement st;
 
         st = connection.createStatement();
@@ -357,6 +384,8 @@ public class CDDataBaseFXMLController implements Initializable {
         }
         
         lstArtist.setItems(artistNamesData);
+        
+        borrowerNameData.removeAll(borrowerNameData);
         
         Statement state;
         
@@ -401,7 +430,7 @@ public class CDDataBaseFXMLController implements Initializable {
         Statement statement = connection.createStatement();
         
         // Execute an update Statement
-        statement.execute("update Album set Status = 'Borrowed' where AlbumName = '" + selectedAlbum + "';");
+        statement.execute("update Album set Status = 'In Hand' where AlbumName = '" + selectedAlbum + "';");
     }
     
 }
