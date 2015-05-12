@@ -16,10 +16,14 @@ import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
@@ -65,11 +69,45 @@ public class CDDataBaseFXMLController implements Initializable {
     private ObservableList artistData;
     private ObservableList albumData;
     private ObservableList borrowerData;
+    private ObservableList borrowListData;
+    
+    private ObservableList artistNamesData;
+    private ObservableList albumNamesData;
+    private ObservableList borrowerNameData;
     
     private static Connection connection;
     private String connectionString;
     private String username;
     private String password;
+    @FXML
+    private Button btnArtist;
+    @FXML
+    private Button btnAddNewArtist;
+    @FXML
+    private Button btnAlbum;
+    @FXML
+    private Button btnAddNewAlbum;
+    @FXML
+    private Button btnBorrower;
+    @FXML
+    private Button btnAddNewBorrower;
+    @FXML
+    private Tab mnuBorrowList;
+    @FXML
+    private ListView<String> lstArtist;
+    
+    private String selectedArtist;
+    private String selectedAlbum;
+    private String selectedBorrower;
+    
+    @FXML
+    private ListView<String> lstAlbums;
+    @FXML
+    private Button btnBorrow;
+    @FXML
+    private TableView<String> tableviewBorrowList;
+    @FXML
+    private ListView<String> lstBorrowerName;
     
     
     
@@ -82,6 +120,52 @@ public class CDDataBaseFXMLController implements Initializable {
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(CDDataBaseFXMLController.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        lstArtist.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
+            
+            selectedArtist = newValue;
+            System.out.println(selectedArtist);
+            
+            try {
+                populateAlbumListview(selectedArtist);
+            } catch (SQLException ex) {
+                Logger.getLogger(CDDataBaseFXMLController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            
+        });
+        
+        lstAlbums.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
+            
+            selectedAlbum = newValue;
+            System.out.println(selectedAlbum);
+            
+        });
+        
+        lstBorrowerName.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
+            
+            selectedBorrower = newValue;
+            System.out.println(selectedBorrower);
+            
+        });
+        
+    }
+    
+    public void populateAlbumListview(String artist) throws SQLException{
+        
+        albumNamesData = FXCollections.observableArrayList();
+        
+        Statement statement;
+
+        statement = connection.createStatement();
+
+        ResultSet rs = statement.executeQuery("select AlbumName from Album where Artist = '" + artist + "';");
+        
+        while (rs.next()) {
+            albumNamesData.add(rs.getString("AlbumName"));
+        }
+        
+        lstAlbums.setItems(albumNamesData);
         
     }
     
@@ -197,9 +281,6 @@ public class CDDataBaseFXMLController implements Initializable {
         buildData(SQL, borrowerData, tableviewBorrower);
     }
 
-    @FXML
-    private void btnBorrowList_Click(ActionEvent event) {
-    }
 
     @FXML
     private void btnAddNewArtist_Click(ActionEvent event) throws SQLException {
@@ -249,6 +330,63 @@ public class CDDataBaseFXMLController implements Initializable {
         borrowerData.removeAll(borrowerData);
         String SQL = "select * from Borrower";
         buildData(SQL, borrowerData, tableviewBorrower);
+    }
+
+    @FXML
+    private void mnuBorrowList_Clicked(Event event) throws SQLException {
+        
+        borrowListData = FXCollections.observableArrayList();
+       
+        Statement statement = connection.createStatement();
+        
+        String SQL = "select * from BorrowList";
+
+        buildData(SQL, borrowListData, tableviewBorrowList);
+        
+        artistNamesData = FXCollections.observableArrayList();
+        
+        Statement st;
+
+        st = connection.createStatement();
+
+        ResultSet rs = st.executeQuery("select Name from Artist");
+        
+        while (rs.next()) {
+            artistNamesData.add(rs.getString("Name"));
+        }
+        
+        lstArtist.setItems(artistNamesData);
+        
+        borrowerNameData = FXCollections.observableArrayList();
+        
+        Statement state;
+        
+        state = connection.createStatement();
+        
+        ResultSet results = state.executeQuery("select Name from Borrower");
+        
+        while (results.next()) {
+            borrowerNameData.add(results.getString("Name"));
+        }
+        
+        lstBorrowerName.setItems(borrowerNameData);
+    }
+
+    @FXML
+    private void btnBorrow_Click(ActionEvent event) throws SQLException {
+        
+        // Create a statement
+        Statement statement = connection.createStatement();
+
+        // Execute an insert statement
+        statement.execute("INSERT INTO BorrowList(id, AlbumName, BorrowerName, BorrowDate, DueDate) VALUES" +
+                "(NULL, '" + selectedAlbum  + "', '" + selectedBorrower + "', '2015-05-12', '2015-05-26');");
+        
+        // Refresh tableview with new data
+        borrowListData.removeAll(borrowListData);
+        String SQL = "select * from BorrowList";
+        buildData(SQL, borrowListData, tableviewBorrowList);
+        
     }
     
 }
