@@ -15,13 +15,18 @@ import javafx.beans.property.StringProperty;
 public class Artist {
     
     private final StringProperty id = new SimpleStringProperty(this, "id", "0");
-    private final StringProperty artist = new SimpleStringProperty(this, "artist", "name");
+    private final StringProperty name = new SimpleStringProperty(this, "name", "name");
     private final StringProperty genre = new SimpleStringProperty(this, "genre", "genre");
     
     public Artist() {
         
     }
     
+    public Artist(Artist artist){
+        this.id.set(artist.getId());
+        this.name.set(artist.getName());
+        this.genre.set(artist.getGenre());
+    }
     
 
     public String getId() {
@@ -36,16 +41,16 @@ public class Artist {
         return id;
     }
     
-     public String getArtist() {
-        return artist.get();
+     public String getName() {
+        return name.get();
     }
 
-    public void setArtist(String value) {
-        artist.set(value);
+    public void setName(String value) {
+        name.set(value);
     }
 
-    public StringProperty artistProperty() {
-        return artist;
+    public StringProperty nameProperty() {
+        return name;
     }
     
     public String getGenre() {

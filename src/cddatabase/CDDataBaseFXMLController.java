@@ -28,6 +28,7 @@ import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
 import java.util.Date;
+import javafx.scene.control.cell.PropertyValueFactory;
 /**
  *
  * @author kevinbudd
@@ -121,6 +122,16 @@ public class CDDataBaseFXMLController implements Initializable {
     private Date date;
     private Date dueDate;
     private SimpleDateFormat sdf;
+    @FXML
+    private TableView<Artist> tableviewArtistClass;
+    @FXML
+    private TableColumn<Artist, String> colID;
+    @FXML
+    private TableColumn<Artist, String> colArtist;
+    @FXML
+    private TableColumn<Artist, String> colGenre;
+    
+    private Artist selectedArtistClass;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -132,6 +143,10 @@ public class CDDataBaseFXMLController implements Initializable {
         long DAY_IN_MS = 1000 * 60 * 60 * 24;
         dueDate = new Date(System.currentTimeMillis() + (14 * DAY_IN_MS));
         System.out.println(sdf.format(dueDate));
+        
+        colID.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colArtist.setCellValueFactory(new PropertyValueFactory<>("name"));
+        colGenre.setCellValueFactory(new PropertyValueFactory<>("genre"));
         
         try {
             // Load the JDBC driver
@@ -184,9 +199,50 @@ public class CDDataBaseFXMLController implements Initializable {
             
         });
         
+        tableviewArtistClass.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            
+            selectedArtistClass = newSelection;
+            
+            System.out.println(selectedArtistClass.getName() + " " + selectedArtistClass.getGenre());
+            
+        });
+            
         
     }
-    
+     /////////////////////////////////////////////////////////////////
+     ////////////////////////////////////////////////////////////////
+     // Class creating method to populate Tableview from Database //
+     ///////////////////////////\//////////////////////////////////
+     //////////////////////////  \////////////////////////////////
+     /////////////////////////\  ////////////////////////////////
+     //////////////////////////\////////////////////////////////
+    private ObservableList<Artist> artistDataClass;
+
+    public void buildDataClass(){        
+    artistDataClass = FXCollections.observableArrayList();
+    try{      
+        String SQL = "Select * from Artist";
+        
+        Statement statement;
+        
+        statement = connection.createStatement();
+        
+        ResultSet rs = statement.executeQuery(SQL);  
+        while(rs.next()){
+            Artist artist = new Artist();
+            artist.setId(rs.getString("id"));                       
+            artist.setName(rs.getString("name"));
+            artist.setGenre((rs.getString("genre")));
+            
+            artistDataClass.add(artist);                  
+        }
+        tableviewArtistClass.setItems(artistDataClass);
+    }
+    catch(Exception e){
+          e.printStackTrace();
+          System.out.println("Error on Building Data");            
+    }
+}
     
     public void populateAlbumListview(String artist) throws SQLException{
         
@@ -284,6 +340,9 @@ public class CDDataBaseFXMLController implements Initializable {
         artistData.removeAll(artistData);
         
         buildData("select * from Artist", artistData, tableviewArtist);
+        
+        buildDataClass();
+        
 
         }
 
