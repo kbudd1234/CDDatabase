@@ -53,7 +53,6 @@ public class CDDataBaseFXMLController implements Initializable {
     private TextField txtAlbumConsoleArtist;
     @FXML
     private TextField txtReleaseDate;
-    @FXML
     private TableView<String> tableviewArtist;
     @FXML
     private TableView<String> tableviewAlbum;
@@ -77,6 +76,8 @@ public class CDDataBaseFXMLController implements Initializable {
     
     private ObservableList albumHistoryData = FXCollections.observableArrayList();
     private ObservableList borrowerHistoryData = FXCollections.observableArrayList();
+    private ObservableList artistDataClass = FXCollections.observableArrayList();
+    private ObservableList borrowListDataClass = FXCollections.observableArrayList();
     
     private static Connection connection;
     private String connectionString;
@@ -108,7 +109,6 @@ public class CDDataBaseFXMLController implements Initializable {
     private ListView<String> lstAlbums;
     @FXML
     private Button btnBorrow;
-    @FXML
     private TableView<String> tableviewBorrowList;
     @FXML
     private ListView<String> lstBorrowerName;
@@ -124,14 +124,27 @@ public class CDDataBaseFXMLController implements Initializable {
     private SimpleDateFormat sdf;
     @FXML
     private TableView<Artist> tableviewArtistClass;
-    @FXML
-    private TableColumn<Artist, String> colID;
-    @FXML
-    private TableColumn<Artist, String> colArtist;
-    @FXML
-    private TableColumn<Artist, String> colGenre;
     
+    private BorrowList selectedBorrowListClass;
     private Artist selectedArtistClass;
+    @FXML
+    private TableView<BorrowList> tableviewBorrowListClass;
+    @FXML
+    private TableColumn<BorrowList, String> colBLID;
+    @FXML
+    private TableColumn<BorrowList, String> colBLAlbumName;
+    @FXML
+    private TableColumn<BorrowList, String> colBLBorrowerName;
+    @FXML
+    private TableColumn<BorrowList, String> colBLBorrowDate;
+    @FXML
+    private TableColumn<BorrowList, String> colBLDueDate;
+    @FXML
+    private TableColumn<Artist, String> colARTID;
+    @FXML
+    private TableColumn<Artist, String> colARTArtist;
+    @FXML
+    private TableColumn<Artist, String> colARTGenre;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -144,9 +157,15 @@ public class CDDataBaseFXMLController implements Initializable {
         dueDate = new Date(System.currentTimeMillis() + (14 * DAY_IN_MS));
         System.out.println(sdf.format(dueDate));
         
-        colID.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colArtist.setCellValueFactory(new PropertyValueFactory<>("name"));
-        colGenre.setCellValueFactory(new PropertyValueFactory<>("genre"));
+        colARTID.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colARTArtist.setCellValueFactory(new PropertyValueFactory<>("name"));
+        colARTGenre.setCellValueFactory(new PropertyValueFactory<>("genre"));
+        
+        colBLID.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colBLAlbumName.setCellValueFactory(new PropertyValueFactory<>("albumName"));
+        colBLBorrowerName.setCellValueFactory(new PropertyValueFactory<>("borrowerName"));
+        colBLBorrowDate.setCellValueFactory(new PropertyValueFactory<>("borrowDate"));
+        colBLDueDate.setCellValueFactory(new PropertyValueFactory<>("dueDate"));
         
         try {
             // Load the JDBC driver
@@ -177,7 +196,7 @@ public class CDDataBaseFXMLController implements Initializable {
             
             albumHistoryData.removeAll(albumHistoryData);
             
-            String SQL = "select AlbumName, BorrowerName, BorrowDate, DueDate from BorrowList where AlbumName = '" + selectedAlbum + "';";
+            String SQL = "select AlbumName, BorrowerName, BorrowDate, DueDate from BorrowListHistory where AlbumName = '" + selectedAlbum + "';";
 
             buildData(SQL, albumHistoryData, tableviewAlbumHistory);
             
@@ -193,7 +212,7 @@ public class CDDataBaseFXMLController implements Initializable {
             
             borrowerHistoryData.removeAll(borrowerHistoryData);
             
-            String SQL = "select AlbumName, BorrowerName, BorrowDate, DueDate from BorrowList where BorrowerName = '" + selectedBorrower + "';";
+            String SQL = "select AlbumName, BorrowerName, BorrowDate, DueDate from BorrowListHistory where BorrowerName = '" + selectedBorrower + "';";
 
             buildData(SQL, borrowerHistoryData, tableviewBorrowerHistory);
             
@@ -206,20 +225,21 @@ public class CDDataBaseFXMLController implements Initializable {
             System.out.println(selectedArtistClass.getName() + " " + selectedArtistClass.getGenre());
             
         });
+        
+        tableviewBorrowListClass.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            
+            selectedBorrowListClass = newSelection;
+            
+            //System.out.println(selectedBorrowListClass.getAlbumName());
+            
+        });
             
         
     }
-     /////////////////////////////////////////////////////////////////
-     ////////////////////////////////////////////////////////////////
-     // Class creating method to populate Tableview from Database //
-     ///////////////////////////\//////////////////////////////////
-     //////////////////////////  \////////////////////////////////
-     /////////////////////////\  ////////////////////////////////
-     //////////////////////////\////////////////////////////////
-    private ObservableList<Artist> artistDataClass;
-
-    public void buildDataClass(){        
-    artistDataClass = FXCollections.observableArrayList();
+     
+     // Class creating method (for artist) to populate Tableview from Database //
+    public void buildArtistDataClass(){        
+   
     try{      
         String SQL = "Select * from Artist";
         
@@ -228,6 +248,7 @@ public class CDDataBaseFXMLController implements Initializable {
         statement = connection.createStatement();
         
         ResultSet rs = statement.executeQuery(SQL);  
+        
         while(rs.next()){
             Artist artist = new Artist();
             artist.setId(rs.getString("id"));                       
@@ -244,6 +265,40 @@ public class CDDataBaseFXMLController implements Initializable {
     }
 }
     
+    public void buildBorrowListDataClass(){        
+   
+        borrowListDataClass.removeAll(borrowListDataClass);
+       
+        
+    try{      
+        String SQL = "Select * from BorrowList";
+        
+        Statement statement;
+        
+        statement = connection.createStatement();
+        
+        ResultSet rs = statement.executeQuery(SQL);  
+        
+        while(rs.next()){
+            BorrowList borrowList = new BorrowList();
+            borrowList.setId(rs.getString("id")); 
+            borrowList.setAlbumName(rs.getString("albumName"));
+            borrowList.setBorrowerName(rs.getString("borrowerName"));
+            borrowList.setBorrowDate(rs.getString("borrowDate"));
+            borrowList.setDueDate(rs.getString("dueDate"));
+           
+            
+            borrowListDataClass.add(borrowList);                  
+        }
+        tableviewBorrowListClass.setItems(borrowListDataClass);
+    }
+    catch(Exception e){
+          e.printStackTrace();
+          System.out.println("Error on Building Data");            
+    }
+}
+    
+    
     public void populateAlbumListview(String artist) throws SQLException{
         
         albumNamesData.removeAll(albumNamesData);
@@ -252,8 +307,8 @@ public class CDDataBaseFXMLController implements Initializable {
 
         statement = connection.createStatement();
 
-        //ResultSet rs = statement.executeQuery("select AlbumName from Album where Artist = '" + artist + "' and Status = 'In Hand';");
-        ResultSet rs = statement.executeQuery("select AlbumName from Album where Artist = '" + artist + "';");
+        ResultSet rs = statement.executeQuery("select AlbumName from Album where Artist = '" + artist 
+                + "' and Status = 'in hand';");
         
         while (rs.next()) {
             albumNamesData.add(rs.getString("AlbumName"));
@@ -272,10 +327,12 @@ public class CDDataBaseFXMLController implements Initializable {
             tableview.getColumns().clear();
             
             // Add Table Columns
-            for(int i=0 ; i<rs.getMetaData().getColumnCount(); i++){
+            for(int i = 0 ; i < rs.getMetaData().getColumnCount(); i++){
                 
-                final int j = i;                
-                TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i+1));
+                final int j = i; 
+                
+                TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i + 1));
+                
                 col.setCellValueFactory(new Callback<CellDataFeatures<ObservableList,String>,ObservableValue<String>>(){                    
                     public ObservableValue<String> call(CellDataFeatures<ObservableList, String> param) {                                                                                              
                         return new SimpleStringProperty(param.getValue().get(j).toString());                        
@@ -289,7 +346,8 @@ public class CDDataBaseFXMLController implements Initializable {
             while(rs.next()){
                 
                 ObservableList<String> row = FXCollections.observableArrayList();
-                for(int i=1 ; i<=rs.getMetaData().getColumnCount(); i++){
+                
+                for(int i = 1 ; i <= rs.getMetaData().getColumnCount(); i++){
                     
                     row.add(rs.getString(i));
                 }
@@ -301,8 +359,8 @@ public class CDDataBaseFXMLController implements Initializable {
             // add data to the tableview
             tableview.setItems(data);
             
-          }catch(Exception e){
-              System.out.println("Error on Building Data");             
+          }catch (Exception ex){
+                          
           }
       }
 
@@ -331,17 +389,12 @@ public class CDDataBaseFXMLController implements Initializable {
             btnConnect.setText("Connect");
         }
         
-    
     }
     
     @FXML
     private void btnArtist_Click(ActionEvent event) throws SQLException {
         
-        artistData.removeAll(artistData);
-        
-        buildData("select * from Artist", artistData, tableviewArtist);
-        
-        buildDataClass();
+        buildArtistDataClass();
         
 
         }
@@ -374,9 +427,9 @@ public class CDDataBaseFXMLController implements Initializable {
             + "', '" + txtArtistGenre.getText() + "');");
         
         // Refresh tableview with new data
-        artistData.removeAll(artistData);
-        String SQL = "select * from Artist";
-        buildData(SQL, artistData, tableviewArtist);
+        artistDataClass.removeAll(artistDataClass);
+        buildArtistDataClass();
+        
         
     }
 
@@ -435,11 +488,7 @@ public class CDDataBaseFXMLController implements Initializable {
     @FXML
     private void mnuBorrowList_Clicked(Event event) throws SQLException {
         
-        Statement statement = connection.createStatement();
-        
-        String SQL = "select * from BorrowList";
-
-        buildData(SQL, borrowListData, tableviewBorrowList);
+        buildBorrowListDataClass();
         
         artistNamesData.removeAll(artistNamesData);
         
@@ -481,9 +530,14 @@ public class CDDataBaseFXMLController implements Initializable {
                 "(NULL, '" + selectedAlbum  + "', '" + selectedBorrower + "', '" + sdf.format(date) +
                 "', '" + sdf.format(dueDate) + "');");
         
-        // Refresh tableview with new data
-        String SQL = "select * from BorrowList";
-        buildData(SQL, borrowListData, tableviewBorrowList);
+        
+        // Execute an insert statement
+        statement.execute("INSERT INTO BorrowListHistory(id, AlbumName, BorrowerName, BorrowDate, DueDate) VALUES" +
+                "(NULL, '" + selectedAlbum  + "', '" + selectedBorrower + "', '" + sdf.format(date) +
+                "', '" + sdf.format(dueDate) + "');");
+        
+        
+        buildBorrowListDataClass();
         
         // Update Album table 
         Statement state = connection.createStatement();
@@ -501,7 +555,13 @@ public class CDDataBaseFXMLController implements Initializable {
         Statement statement = connection.createStatement();
         
         // Execute an update Statement
-        statement.execute("update Album set Status = 'In Hand' where AlbumName = '" + selectedAlbum + "';");
+        statement.execute("update Album set Status = 'In Hand' where AlbumName = '" + selectedBorrowListClass.getAlbumName() + "';");
+        
+        statement.clearBatch();
+        
+        statement.execute("delete from BorrowList where AlbumName = '" + selectedBorrowListClass.getAlbumName() + "';");
+        
+        buildBorrowListDataClass();
     }
     
 }

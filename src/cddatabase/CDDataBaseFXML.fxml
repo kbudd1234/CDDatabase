@@ -26,12 +26,11 @@
                         <Button fx:id="btnAddNewArtist" layoutX="484.0" layoutY="87.0" mnemonicParsing="false" onAction="#btnAddNewArtist_Click" text="Add New Artist" />
                         <Label layoutX="396.0" layoutY="19.0" text="Artist:" />
                         <Label layoutX="391.0" layoutY="55.0" text="Genre:" />
-                        <TableView fx:id="tableviewArtist" layoutX="78.0" layoutY="136.0" prefHeight="155.0" prefWidth="428.0" />
-                        <TableView fx:id="tableviewArtistClass" layoutX="78.0" layoutY="298.0" prefHeight="200.0" prefWidth="228.0">
+                        <TableView fx:id="tableviewArtistClass" layoutX="78.0" layoutY="146.0" prefHeight="352.0" prefWidth="429.0">
                           <columns>
-                            <TableColumn fx:id="colID" prefWidth="75.0" text="ID" />
-                            <TableColumn fx:id="colArtist" prefWidth="75.0" text="Artist" />
-                              <TableColumn fx:id="colGenre" prefWidth="75.0" text="Genre" />
+                            <TableColumn fx:id="colARTID" prefWidth="75.0" text="ID" />
+                            <TableColumn fx:id="colARTArtist" prefWidth="95.0" text="Artist" />
+                              <TableColumn fx:id="colARTGenre" prefWidth="82.0" text="Genre" />
                           </columns>
                         </TableView>
                      </children>
@@ -79,7 +78,6 @@
                         <ListView fx:id="lstArtist" layoutX="16.0" layoutY="63.0" prefHeight="140.0" prefWidth="174.0" />
                         <ListView fx:id="lstAlbums" layoutX="213.0" layoutY="63.0" prefHeight="140.0" prefWidth="174.0" />
                         <Button fx:id="btnBorrow" layoutX="39.0" layoutY="11.0" mnemonicParsing="false" onAction="#btnBorrow_Click" prefHeight="26.0" prefWidth="110.0" text="Borrow Album" />
-                        <TableView fx:id="tableviewBorrowList" layoutX="13.0" layoutY="355.0" prefHeight="149.0" prefWidth="583.0" />
                         <ListView fx:id="lstBorrowerName" layoutX="413.0" layoutY="63.0" prefHeight="140.0" prefWidth="184.0" />
                         <Button fx:id="btnReturn" layoutX="456.0" layoutY="11.0" mnemonicParsing="false" onAction="#btnReturn_Click" prefHeight="26.0" prefWidth="107.0" text="Return Album" />
                         <TableView fx:id="tableviewAlbumHistory" layoutX="16.0" layoutY="222.0" prefHeight="112.0" prefWidth="268.0" />
@@ -90,6 +88,15 @@
                         <Label layoutX="98.0" layoutY="203.0" text="Album History" />
                         <Label layoutX="430.0" layoutY="203.0" text="Borrower History" />
                         <Label layoutX="260.0" layoutY="334.0" text="Borrow History" />
+                        <TableView fx:id="tableviewBorrowListClass" layoutX="16.0" layoutY="342.0" prefHeight="169.0" prefWidth="580.0">
+                          <columns>
+                            <TableColumn fx:id="colBLID" prefWidth="75.0" text="ID" />
+                            <TableColumn fx:id="colBLAlbumName" prefWidth="154.0" text="Album Name" />
+                              <TableColumn fx:id="colBLBorrowerName" prefWidth="133.0" text="Borrower Name" />
+                              <TableColumn fx:id="colBLBorrowDate" prefWidth="103.0" text="Borrow Date" />
+                              <TableColumn fx:id="colBLDueDate" prefWidth="113.0" text="Due Date" />
+                          </columns>
+                        </TableView>
                      </children>
                   </AnchorPane>
               </content>
